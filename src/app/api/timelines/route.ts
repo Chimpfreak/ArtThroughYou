@@ -22,7 +22,7 @@ export async function POST(req:Request){
     const parts=await generateWithGemini(process.env.GEMINI_IMAGE_MODEL||'gemini-3.1-flash-image',[
       {text:prompt},
       {inline_data:{mime_type:mime,data:imageData}}
-    ],{responseModalities:['IMAGE'],responseFormat:{image:{aspectRatio:'16:9',imageSize:'2K'}}});
+    ],{responseModalities:['IMAGE'],imageConfig:{aspectRatio:'16:9',imageSize:'2K'}});
     const image=parts.find(p=>p.inlineData?.data)?.inlineData;
     if(!image?.data)return NextResponse.json({error:'Gemini returned no four-timeline image.'},{status:502});
     return NextResponse.json({dataUrl:`data:${image.mimeType||'image/png'};base64,${image.data}`});

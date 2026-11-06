@@ -14,18 +14,26 @@ npm run dev
 
 Open http://localhost:3000. The app works in **Demo Mode** without API keys. Progress is stored in the browser's local storage.
 
-## Optional AI mode
+## AI setup
 
-Add keys to `.env.local`:
+The app uses Gemini for text and Cloudflare Workers AI for images.
+
+Add these server-side keys to `.env.local`:
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-2.0-flash
-OPENAI_API_KEY=your_openai_api_key
-OPENAI_IMAGE_MODEL=gpt-image-1
+GEMINI_MODEL=gemini-3.8-flash
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+CLOUDFLARE_API_TOKEN=your_workers_ai_api_token
 ```
 
-Restart the development server and switch the header control to **AI MODE ON**. Gemini writes the personalised chapter and image prompt; OpenAI Images generates the artwork. API usage may incur charges. Never put secret keys in `NEXT_PUBLIC_` variables or commit `.env.local`.
+- **Gemini** writes personalised chapters and adaptive reflection questions.
+- **Cloudflare Workers AI FLUX.1 schnell** generates era artwork. The Workers AI Free plan includes 10,000 Neurons per day; usage beyond the free allocation requires a paid Workers plan.
+- **Cloudflare Stable Diffusion 1.5 img2img** creates the four-timeline portrait sheet from the uploaded portrait. This model is currently listed as beta and at $0.00 per step; availability and limits can change. Its identity preservation is less reliable than the former Gemini image model.
+
+To create Cloudflare credentials, open **AI > Workers AI > Use REST API** in the Cloudflare dashboard, select **Create a Workers AI API Token**, and copy the Account ID. If creating a token manually, grant **Workers AI - Read** and **Workers AI - Edit** permissions. Add both values to Vercel under Project Settings > Environment Variables (Production, Preview and Development), then redeploy.
+
+Never put secret keys in `NEXT_PUBLIC_` variables or commit `.env.local`.
 
 ## Persistence
 
@@ -36,7 +44,7 @@ The initial MVP persists the complete journey in browser local storage, which ma
 1. Push this repository to GitHub.
 2. In Vercel, select **Add New → Project** and import `Chimpfreak/ArtThroughYou`.
 3. Keep the framework preset as Next.js and the root directory as `.`.
-4. Add `GEMINI_API_KEY`, `GEMINI_MODEL`, and `GEMINI_IMAGE_MODEL` as environment variables if using Gemini AI mode.
+4. Add `GEMINI_API_KEY`, `GEMINI_MODEL`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_API_TOKEN` as environment variables.
 5. Deploy. Demo Mode works without these keys.
 
 A GitHub push does not itself publish a Next.js app. Vercel must be connected and the deployment must complete successfully.
@@ -45,8 +53,12 @@ A GitHub push does not itself publish a Next.js app. Vercel must be connected an
 
 ```text
 src/app/                 Next.js pages and API routes
-src/app/api/story/       Gemini narrative endpoint\nsrc/app/api/question/    Gemini adaptive-question endpoint\nsrc/app/api/timelines/   Gemini portrait timeline endpoint\nsrc/lib/gemini.ts        Shared Gemini API helper
-src/app/api/artwork/     Gemini image-generation endpoint
+src/app/api/story/       Gemini narrative endpoint
+src/app/api/question/    Gemini adaptive-question endpoint
+src/app/api/timelines/   Cloudflare identity-guided image endpoint
+src/lib/gemini.ts        Shared Gemini text API helper
+src/lib/cloudflare-ai.ts Shared Cloudflare Workers AI image helper
+src/app/api/artwork/     Cloudflare FLUX image-generation endpoint
 src/lib/eras.ts          Curated era configuration and historical notes
 src/lib/types.ts         Journey and memory types
 supabase/migrations/     Initial database schema
@@ -57,7 +69,8 @@ supabase/migrations/     Initial database schema
 - Five fixed historical eras and curated historical context.
 - Six distinct choices per chapter, with varied ordering.
 - Persistent journey state and evolving symbol/theme memory.
-- Gemini-generated artwork, adaptive questions, personalised stories and four parallel-life portrait sheet; curated demo fallbacks when no key is configured.
+- Gemini-generated adaptive questions and personalised stories.
+- Cloudflare-generated era artwork and four parallel-life portrait sheet, with curated demo fallbacks when image services are not configured.
 - Final chronological gallery and print stylesheet.
 - Local browser persistence and AI API endpoints.
 

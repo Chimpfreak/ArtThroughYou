@@ -1,6 +1,11 @@
 type GeminiPart = { text?: string; inline_data?: { mime_type: string; data: string } };
 type GeminiOutputPart = { text?: string; inlineData?: { mimeType?: string; data?: string } };
-type GeminiConfig = { responseMimeType?: string; responseModalities?: string[]; temperature?: number; responseFormat?: { image?: { aspectRatio?: string; imageSize?: string } } };
+type GeminiConfig = {
+  responseMimeType?: string;
+  responseModalities?: string[];
+  temperature?: number;
+  imageConfig?: { aspectRatio?: string; imageSize?: string };
+};
 
 export async function generateWithGemini(
   model: string,
